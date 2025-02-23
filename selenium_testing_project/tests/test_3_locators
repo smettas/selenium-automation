@@ -1,0 +1,41 @@
+import time
+
+from selenium import webdriver
+
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.common.by import By
+
+service = Service(ChromeDriverManager().install())
+driver = webdriver.Chrome(service=service)
+
+driver.get("https://opensource-demo.orangehrmlive.com")
+time.sleep(3)
+driver.maximize_window()
+
+driver.find_element(By.NAME,"username").send_keys("Admin")
+driver.find_element(By.NAME,"password").send_keys("admin123")
+
+driver.find_element(By.XPATH,"//button[@type='submit']").click()
+time.sleep(5)
+
+driver.find_element(By.CSS_SELECTOR,"a.oxd-brand").click()
+
+sliders = driver.find_elements(By.CLASS_NAME,"owl-item")
+links = driver.find_elements(By.TAG_NAME,"a")
+
+print("Sai",len(sliders))
+print("Krishna",len(links))
+
+driver.find_element(By.NAME,"EmailHomePage").send_keys("msaikrishnam092@gmail.com")
+time.sleep(3)
+
+driver.find_element(By.NAME,"action_request").click()
+driver.find_element(By.CSS_SELECTOR,"input#Form_getForm_subdomain").send_keys("smetta")
+driver.find_element(By.XPATH,"//input[@id='Form_getForm_Name']").send_keys("Sai Krishna Metta")
+time.sleep(5)
+
+driver.find_element(By.NAME,"Contact").send_keys("7032022441")
+#driver.find_element(By.CSS_SELECTOR,"select.dropdown").click("India")
+
+time.sleep(5)
