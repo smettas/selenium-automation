@@ -3,13 +3,18 @@ import pytest
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
-from selenium.webdriver.edge.service import Service
+from selenium.webdriver.edge.service import Service as EdgeService
 from webdriver_manager.microsoft import EdgeChromiumDriverManager
+
+ops=webdriver.ChromeOptions()
+opss=webdriver.EdgeOptions()
+ops.add_argument("--headless")
+opss.add_argument("--headless")
 
 @pytest.fixture(scope="class")
 def setup(request):  #######requrest name we need to pass......
     service=Service(ChromeDriverManager().install())
-    driver=webdriver.Chrome(service=service)
+    driver=webdriver.Chrome(service=service, options=ops)
     driver.implicitly_wait(10)  
     request.cls.driver=driver   ########## Assigning the driver to the test class instance 
     yield driver        ###### Yield before driver starts.... Yield after driver closes #######
@@ -20,10 +25,10 @@ def setup(request):  #######requrest name we need to pass......
 def browsers(request, browser):  #######requrest name we need to pass......
     if browser=="chrome":
         service=Service(ChromeDriverManager().install())
-        driver=webdriver.Chrome(service=service)
+        driver=webdriver.Chrome(service=service, options=ops)
     elif browser=="edge":
-        service=Service(EdgeChromiumDriverManager().install())
-        driver=webdriver.Edge(service=service)
+        service=EdgeService(EdgeChromiumDriverManager().install())
+        driver=webdriver.Edge(service=service, options=opss)
     driver.implicitly_wait(10)  
     request.cls.driver=driver   ########## Assigning the driver to the test class instance 
     yield driver        ###### Yield before driver starts.... Yield after driver closes #######

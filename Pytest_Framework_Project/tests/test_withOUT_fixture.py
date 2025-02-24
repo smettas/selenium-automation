@@ -1,14 +1,18 @@
+from ssl import Options
 import pytest
 
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 
+ops=webdriver.ChromeOptions()
+ops.add_argument("--headless")
+
 driver = None
 def setup_module(module):
     global driver
     service=Service(ChromeDriverManager().install())
-    driver=webdriver.Chrome(service=service)
+    driver=webdriver.Chrome(service=service, options=ops)
     driver.implicitly_wait(10)
     driver.get("https://www.google.com")
 
