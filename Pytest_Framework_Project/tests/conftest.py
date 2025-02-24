@@ -1,3 +1,4 @@
+import os
 import pytest
 
 from selenium import webdriver
@@ -6,15 +7,27 @@ from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.edge.service import Service as EdgeService
 from webdriver_manager.microsoft import EdgeChromiumDriverManager
 
-ops=webdriver.ChromeOptions()
-opss=webdriver.EdgeOptions()
-ops.add_argument("--headless")
-opss.add_argument("--headless")
+# Check if running in Jenkins environment
+HEADLESS_MODE = os.getenv("PYTEST_HEADLESS", "true").lower()=="true"
 
+chrome_options = webdriver.ChromeOptions()
+edge_options = webdriver.EdgeOptions()
+
+if HEADLESS_MODE:
+    chrome_options.add_argument("--headless")
+    chrome_options.add_argument("--disable-gpu")  # Prevent some CI issues
+    chrome_options.add_argument("--no-sandbox")   # Required for some CI/CD environments
+    chrome_options.add_argument("--disable-dev-shm-usage")  # Prevents shared memory issues
+
+    edge_options.add_argument("--headless")
+    edge_options.add_argument("--disable-gpu")  # Prevent some CI issues
+    edge_options.add_argument("--no-sandbox")   # Required for some CI/CD environments
+    edge_options.add_argument("--disable-dev-shm-usage")  # Prevents shared memory issues
+    
 @pytest.fixture(scope="class")
 def setup(request):  #######requrest name we need to pass......
     service=Service(ChromeDriverManager().install())
-    driver=webdriver.Chrome(service=service, options=ops)
+    driver=webdriver.Chrome(service=service, options=chrome_options)
     driver.implicitly_wait(10)  
     request.cls.driver=driver   ########## Assigning the driver to the test class instance 
     yield driver        ###### Yield before driver starts.... Yield after driver closes #######
@@ -23,16 +36,21 @@ def setup(request):  #######requrest name we need to pass......
 
 @pytest.fixture(scope="function")
 def browsers(request, browser):  #######requrest name we need to pass......
+
+    ####### Fixture for setting up browser based on parameter #####
+    driver = None
     if browser=="chrome":
         service=Service(ChromeDriverManager().install())
-        driver=webdriver.Chrome(service=service, options=ops)
+        driver=webdriver.Chrome(service=service, options=chrome_options)
     elif browser=="edge":
         service=EdgeService(EdgeChromiumDriverManager().install())
-        driver=webdriver.Edge(service=service, options=opss)
-    driver.implicitly_wait(10)  
-    request.cls.driver=driver   ########## Assigning the driver to the test class instance 
-    yield driver        ###### Yield before driver starts.... Yield after driver closes #######
-    driver.quit() 
+        driver=webdriver.Edge(service=service, options=edge_options)
+
+    if driver:    
+        driver.implicitly_wait(10)  
+        request.cls.driver=driver   ########## Assigning the driver to the test class instance 
+        yield driver        ###### Yield before driver starts.... Yield after driver closes #######
+        driver.quit() 
 
 
 
